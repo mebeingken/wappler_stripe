@@ -1,0 +1,30 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="index" appConnect="local" components="{dmxStripe:{}}" -->
+<script is="dmx-flow" id="flow_page_load" type="text/dmx-flow" autorun="true">{
+  run: {action: "{{shopping_cart.clear()}}", outputType: "text"}
+}</script>
+<dmx-stripe id="stripe1" key="YOUR-STRIPE_PUBLISHABLE-KEY" dmx-bind:line-items="shopping_cart.data" checkout="server" session-url="/api/create_checkout"></dmx-stripe>
+<meta name="ac:route" content="/">
+<div class="container mt-5">
+    <div class="row">
+        <div class="col">
+            <h1>Stripe sample</h1>
+        </div>
+        <div class="col">
+            <button id="btn1" class="btn btn-primary" dmx-on:click="shopping_cart.insert({product_id: '11-1111', quantity: 1})">Item 1 to cart</button>
+            <button id="btn2" class="btn btn-info" dmx-on:click="shopping_cart.insert({product_id: '22-2222', quantity: 2})">Item 2 to cart</button>
+            <button id="btn3" class="btn btn-warning" dmx-on:click="shopping_cart.insert({product_id: '33-3333', quantity: 3})">Item 3 to cart</button>
+            <button id="btn4" class="btn btn-secondary" dmx-on:click="shopping_cart.clear()">Clear cart</button>
+            <button id="btn5" class="btn btn-success" dmx-on:click="stripe1.checkout()">Purchase cart</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <h4>Cart items</h4>
+        </div>
+    </div>
+    <div class="row row-cols-1" is="dmx-repeat" id="repeat1" dmx-bind:repeat="shopping_cart.data">
+        <div class="col">
+            <h5 dmx-text="'( '+quantity+' )'+product_id">Fancy display heading</h5>
+        </div>
+    </div>
+</div>

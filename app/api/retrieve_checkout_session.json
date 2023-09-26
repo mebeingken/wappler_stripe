@@ -1,0 +1,348 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "checkout_session_id"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "options": {
+          "comment": "For this example, all of the session is output to the client, however in production you should limit the output to only the data you will need in order to properly display a confirmation, etc."
+        }
+      },
+      {
+        "name": "retrieveCheckoutSession",
+        "module": "stripe",
+        "action": "retrieveCheckoutSession",
+        "options": {
+          "session": "{{$_GET.checkout_session_id}}"
+        },
+        "outputType": "object",
+        "meta": [
+          {
+            "name": "after_expiration",
+            "type": "object",
+            "ref": "stripe_payment_pages_checkout_session_after_expiration"
+          },
+          {
+            "name": "allow_promotion_codes",
+            "type": "boolean"
+          },
+          {
+            "name": "amount_subtotal",
+            "type": "number"
+          },
+          {
+            "name": "amount_total",
+            "type": "number"
+          },
+          {
+            "name": "automatic_tax",
+            "type": "object",
+            "ref": "stripe_payment_pages_checkout_session_automatic_tax"
+          },
+          {
+            "name": "billing_address_collection",
+            "type": "text"
+          },
+          {
+            "name": "cancel_url",
+            "type": "text"
+          },
+          {
+            "name": "client_reference_id",
+            "type": "text"
+          },
+          {
+            "name": "consent",
+            "type": "object",
+            "ref": "stripe_payment_pages_checkout_session_consent"
+          },
+          {
+            "name": "consent_collection",
+            "type": "object",
+            "ref": "stripe_payment_pages_checkout_session_consent_collection"
+          },
+          {
+            "name": "currency",
+            "type": "text"
+          },
+          {
+            "name": "customer",
+            "type": "text",
+            "expand": [
+              "stripe_customer",
+              "stripe_deleted_customer"
+            ]
+          },
+          {
+            "name": "customer_creation",
+            "type": "text"
+          },
+          {
+            "name": "customer_details",
+            "type": "object",
+            "ref": "stripe_payment_pages_checkout_session_customer_details"
+          },
+          {
+            "name": "customer_email",
+            "type": "text"
+          },
+          {
+            "name": "expires_at",
+            "type": "number"
+          },
+          {
+            "name": "id",
+            "type": "text"
+          },
+          {
+            "name": "line_items",
+            "type": "object",
+            "sub": [
+              {
+                "name": "data",
+                "type": "array",
+                "sub": [
+                  {
+                    "name": "amount_discount",
+                    "type": "number"
+                  },
+                  {
+                    "name": "amount_subtotal",
+                    "type": "number"
+                  },
+                  {
+                    "name": "amount_tax",
+                    "type": "number"
+                  },
+                  {
+                    "name": "amount_total",
+                    "type": "number"
+                  },
+                  {
+                    "name": "currency",
+                    "type": "text"
+                  },
+                  {
+                    "name": "description",
+                    "type": "text"
+                  },
+                  {
+                    "name": "discounts",
+                    "type": "array",
+                    "sub": [
+                      {
+                        "name": "amount",
+                        "type": "number"
+                      },
+                      {
+                        "name": "discount",
+                        "type": "object",
+                        "ref": "stripe_discount"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "id",
+                    "type": "text"
+                  },
+                  {
+                    "name": "object",
+                    "type": "text"
+                  },
+                  {
+                    "name": "price",
+                    "type": "object",
+                    "ref": "stripe_price"
+                  },
+                  {
+                    "name": "product",
+                    "type": "text",
+                    "expand": [
+                      "stripe_product",
+                      "stripe_deleted_product"
+                    ]
+                  },
+                  {
+                    "name": "quantity",
+                    "type": "number"
+                  },
+                  {
+                    "name": "taxes",
+                    "type": "array",
+                    "sub": [
+                      {
+                        "name": "amount",
+                        "type": "number"
+                      },
+                      {
+                        "name": "rate",
+                        "type": "object",
+                        "ref": "stripe_tax_rate"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "has_more",
+                "type": "boolean"
+              },
+              {
+                "name": "object",
+                "type": "text"
+              },
+              {
+                "name": "url",
+                "type": "text"
+              }
+            ]
+          },
+          {
+            "name": "livemode",
+            "type": "boolean"
+          },
+          {
+            "name": "locale",
+            "type": "text"
+          },
+          {
+            "name": "metadata",
+            "type": "object"
+          },
+          {
+            "name": "mode",
+            "type": "text"
+          },
+          {
+            "name": "object",
+            "type": "text"
+          },
+          {
+            "name": "payment_intent",
+            "type": "text",
+            "expand": [
+              "stripe_payment_intent"
+            ]
+          },
+          {
+            "name": "payment_link",
+            "type": "text",
+            "expand": [
+              "stripe_payment_link"
+            ]
+          },
+          {
+            "name": "payment_method_options",
+            "type": "object",
+            "ref": "stripe_checkout_session_payment_method_options"
+          },
+          {
+            "name": "payment_method_types",
+            "type": "array",
+            "sub": []
+          },
+          {
+            "name": "payment_status",
+            "type": "text"
+          },
+          {
+            "name": "phone_number_collection",
+            "type": "object",
+            "ref": "stripe_payment_pages_checkout_session_phone_number_collection"
+          },
+          {
+            "name": "recovered_from",
+            "type": "text"
+          },
+          {
+            "name": "setup_intent",
+            "type": "text",
+            "expand": [
+              "stripe_setup_intent"
+            ]
+          },
+          {
+            "name": "shipping",
+            "type": "object",
+            "ref": "stripe_shipping"
+          },
+          {
+            "name": "shipping_address_collection",
+            "type": "object",
+            "ref": "stripe_payment_pages_checkout_session_shipping_address_collection"
+          },
+          {
+            "name": "shipping_options",
+            "type": "array",
+            "sub": [
+              {
+                "name": "shipping_amount",
+                "type": "number"
+              },
+              {
+                "name": "shipping_rate",
+                "type": "text",
+                "expand": [
+                  "stripe_shipping_rate"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "shipping_rate",
+            "type": "text",
+            "expand": [
+              "stripe_shipping_rate"
+            ]
+          },
+          {
+            "name": "status",
+            "type": "text"
+          },
+          {
+            "name": "submit_type",
+            "type": "text"
+          },
+          {
+            "name": "subscription",
+            "type": "text",
+            "expand": [
+              "stripe_subscription"
+            ]
+          },
+          {
+            "name": "success_url",
+            "type": "text"
+          },
+          {
+            "name": "tax_id_collection",
+            "type": "object",
+            "ref": "stripe_payment_pages_checkout_session_tax_id_collection"
+          },
+          {
+            "name": "total_details",
+            "type": "object",
+            "ref": "stripe_payment_pages_checkout_session_total_details"
+          },
+          {
+            "name": "url",
+            "type": "text"
+          }
+        ],
+        "output": true
+      }
+    ]
+  }
+}

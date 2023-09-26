@@ -1,0 +1,102 @@
+{
+  "meta": {
+    "$_PARAM": [
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "display_name"
+      },
+      {
+        "type": "number",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "amount"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "options": {
+          "comment": "This library creates a shipping rate data object that can be included in a shipping options array for stripe.\n\nThe type is always fixed_amount as this is all Stripe currently supports.\n\nThe currency is hard coded for usd, but can be modified to support other currencies.\n\nthe amount needs to be in cents, so we multiply the parameter by 100"
+        }
+      },
+      {
+        "name": "shipping_rate_data",
+        "module": "core",
+        "action": "group",
+        "options": {
+          "exec": {
+            "steps": [
+              {
+                "name": "display_name",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{$_PARAM.display_name}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "type",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "fixed_amount"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "fixed_amount",
+                "module": "core",
+                "action": "group",
+                "options": {
+                  "exec": {
+                    "steps": [
+                      {
+                        "name": "amount",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{$_PARAM.amount*100}}"
+                        },
+                        "meta": [],
+                        "outputType": "number",
+                        "output": true
+                      },
+                      {
+                        "name": "currency",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "usd"
+                        },
+                        "meta": [],
+                        "outputType": "text",
+                        "output": true
+                      }
+                    ]
+                  }
+                },
+                "output": true
+              }
+            ]
+          }
+        },
+        "output": true
+      }
+    ]
+  }
+}

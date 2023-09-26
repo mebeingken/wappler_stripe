@@ -1,0 +1,856 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "array",
+        "name": "lineItems",
+        "sub": [
+          {
+            "type": "text",
+            "name": "quantity"
+          },
+          {
+            "type": "text",
+            "name": "product_id"
+          }
+        ]
+      }
+    ]
+  },
+  "exec": {
+    "steps": {
+      "name": "",
+      "module": "core",
+      "action": "trycatch",
+      "options": {
+        "try": {
+          "steps": [
+            {
+              "name": "",
+              "options": {
+                "comment": "Lookup the products purchased to get the amount of the product from the database (rather than getting from the client)"
+              }
+            },
+            {
+              "name": "products_purchased",
+              "module": "dbconnector",
+              "action": "select",
+              "options": {
+                "connection": "db",
+                "sql": {
+                  "type": "select",
+                  "columns": [
+                    {
+                      "table": "products",
+                      "column": "title"
+                    },
+                    {
+                      "table": "products",
+                      "column": "amount"
+                    },
+                    {
+                      "table": "products",
+                      "column": "product_id"
+                    }
+                  ],
+                  "params": [],
+                  "table": {
+                    "name": "products"
+                  },
+                  "primary": "primary_id",
+                  "joins": [],
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "products.product_id",
+                        "field": "products.product_id",
+                        "type": "string",
+                        "operator": "in",
+                        "value": "{{$_POST.lineItems.flatten('product_id')}}",
+                        "data": {
+                          "table": "products",
+                          "column": "product_id",
+                          "type": "text",
+                          "columnObj": {
+                            "type": "string",
+                            "maxLength": 255,
+                            "primary": false,
+                            "unique": false,
+                            "nullable": true,
+                            "name": "product_id"
+                          }
+                        },
+                        "operation": "IN",
+                        "table": "products"
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "query": "select `title`, `amount`, `product_id` from `products` where `products`.`product_id` in ?"
+                }
+              },
+              "output": false,
+              "meta": [
+                {
+                  "type": "text",
+                  "name": "title"
+                },
+                {
+                  "type": "number",
+                  "name": "amount"
+                },
+                {
+                  "type": "text",
+                  "name": "product_id"
+                }
+              ],
+              "outputType": "array"
+            },
+            {
+              "name": "",
+              "options": {
+                "comment": "Spin through each of the lineItems that comes as POST input"
+              }
+            },
+            {
+              "name": "line_items",
+              "module": "core",
+              "action": "repeat",
+              "options": {
+                "repeat": "{{$_POST.lineItems}}",
+                "outputFields": [],
+                "exec": {
+                  "steps": [
+                    {
+                      "name": "",
+                      "options": {
+                        "comment": "Set all the values needed by Stripe for custom product/price"
+                      }
+                    },
+                    {
+                      "name": "",
+                      "options": {
+                        "comment": "Get the title from the db query"
+                      }
+                    },
+                    {
+                      "name": "title",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": "{{products_purchased.where('product_id', '==', product_id)[0].title}}"
+                      },
+                      "meta": [
+                        {
+                          "name": "title",
+                          "type": "text"
+                        },
+                        {
+                          "name": "amount",
+                          "type": "number"
+                        },
+                        {
+                          "name": "product_id",
+                          "type": "text"
+                        }
+                      ],
+                      "outputType": "text",
+                      "output": true
+                    },
+                    {
+                      "name": "",
+                      "options": {
+                        "comment": "Static \"usd\" if only dealing with US dollars"
+                      }
+                    },
+                    {
+                      "name": "currency",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": "usd"
+                      },
+                      "meta": [],
+                      "outputType": "text",
+                      "output": true
+                    },
+                    {
+                      "name": "",
+                      "options": {
+                        "comment": "Quantity comes from POST input"
+                      }
+                    },
+                    {
+                      "name": "quantity",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": "{{quantity}}"
+                      },
+                      "meta": [],
+                      "outputType": "number",
+                      "output": true
+                    },
+                    {
+                      "name": "",
+                      "options": {
+                        "comment": "Get the amount from the db query"
+                      }
+                    },
+                    {
+                      "name": "amount",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": "{{(products_purchased.where('product_id', '==', product_id)[0].amount)*100}}"
+                      },
+                      "meta": [],
+                      "outputType": "text",
+                      "output": true
+                    }
+                  ]
+                }
+              },
+              "output": false,
+              "meta": [
+                {
+                  "name": "$index",
+                  "type": "number"
+                },
+                {
+                  "name": "$number",
+                  "type": "number"
+                },
+                {
+                  "name": "$name",
+                  "type": "text"
+                },
+                {
+                  "name": "$value",
+                  "type": "object"
+                },
+                {
+                  "name": "quantity",
+                  "type": "text"
+                },
+                {
+                  "name": "product_id",
+                  "type": "text"
+                },
+                {
+                  "name": "title",
+                  "type": "text",
+                  "sub": [
+                    {
+                      "name": "title",
+                      "type": "text"
+                    },
+                    {
+                      "name": "amount",
+                      "type": "number"
+                    },
+                    {
+                      "name": "product_id",
+                      "type": "text"
+                    }
+                  ]
+                },
+                {
+                  "name": "currency",
+                  "type": "text",
+                  "sub": []
+                },
+                {
+                  "name": "quantity",
+                  "type": "number",
+                  "sub": []
+                },
+                {
+                  "name": "amount",
+                  "type": "text",
+                  "sub": []
+                }
+              ],
+              "outputType": "array"
+            },
+            {
+              "name": "",
+              "options": {
+                "comment": "Create the array that will hold all shipping options for this order"
+              }
+            },
+            {
+              "name": "shipping_options_array",
+              "module": "arraylist",
+              "action": "create",
+              "options": {
+                "schema": [
+                  {
+                    "type": "object",
+                    "name": "shipping_rate_data",
+                    "sub": [
+                      {
+                        "type": "text",
+                        "name": "display_name"
+                      },
+                      {
+                        "type": "text",
+                        "name": "type"
+                      },
+                      {
+                        "type": "object",
+                        "name": "fixed_amount",
+                        "sub": [
+                          {
+                            "type": "number",
+                            "name": "amount"
+                          },
+                          {
+                            "type": "text",
+                            "name": "currency"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "meta": [
+                {
+                  "type": "object",
+                  "name": "shipping_rate_data",
+                  "sub": [
+                    {
+                      "type": "text",
+                      "name": "display_name"
+                    },
+                    {
+                      "type": "text",
+                      "name": "type"
+                    },
+                    {
+                      "type": "object",
+                      "name": "fixed_amount",
+                      "sub": [
+                        {
+                          "type": "number",
+                          "name": "amount"
+                        },
+                        {
+                          "type": "text",
+                          "name": "currency"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "outputType": "array"
+            },
+            {
+              "name": "",
+              "options": {
+                "comment": "Create the first shipping option."
+              }
+            },
+            {
+              "name": "shipping_option_1",
+              "module": "core",
+              "action": "exec",
+              "options": {
+                "exec": "create_shipping_option",
+                "params": {
+                  "amount": 18.45,
+                  "display_name": "Standard shipping"
+                }
+              },
+              "output": false
+            },
+            {
+              "name": "",
+              "options": {
+                "comment": "Add the first shipping option into the shipping options array"
+              }
+            },
+            {
+              "name": "",
+              "module": "arraylist",
+              "action": "add",
+              "options": {
+                "ref": "shipping_options_array",
+                "value": {
+                  "shipping_rate_data": "{{shipping_option_1.shipping_rate_data}}"
+                }
+              }
+            },
+            {
+              "name": "",
+              "options": {
+                "comment": "create the second shipping option"
+              }
+            },
+            {
+              "name": "shipping_option_2",
+              "module": "core",
+              "action": "exec",
+              "options": {
+                "exec": "create_shipping_option",
+                "params": {
+                  "display_name": "Faster shipping",
+                  "amount": 29.65
+                }
+              },
+              "output": false
+            },
+            {
+              "name": "",
+              "options": {
+                "comment": "add the second shipping option to the shipping options array"
+              }
+            },
+            {
+              "name": "",
+              "module": "arraylist",
+              "action": "add",
+              "options": {
+                "ref": "shipping_options_array",
+                "value": {
+                  "shipping_rate_data": "{{shipping_option_2.shipping_rate_data}}"
+                }
+              }
+            },
+            {
+              "name": "",
+              "options": {
+                "comment": "retrieve the entire shipping options array to be used in checkout session"
+              }
+            },
+            {
+              "name": "shipping_options",
+              "module": "arraylist",
+              "action": "value",
+              "options": {
+                "ref": "shipping_options_array"
+              },
+              "output": false,
+              "meta": [
+                {
+                  "name": "shipping_rate_data",
+                  "type": "object",
+                  "sub": [
+                    {
+                      "name": "display_name",
+                      "type": "text"
+                    },
+                    {
+                      "name": "type",
+                      "type": "text"
+                    },
+                    {
+                      "name": "fixed_amount",
+                      "type": "object",
+                      "sub": [
+                        {
+                          "name": "amount",
+                          "type": "number"
+                        },
+                        {
+                          "name": "currency",
+                          "type": "text"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "outputType": "array"
+            },
+            {
+              "name": "",
+              "options": {
+                "comment": "Create the checkout session and output to id so the front end can trigger payment at stripe portal"
+              }
+            },
+            {
+              "name": "createCheckoutSession",
+              "module": "stripe",
+              "action": "createCheckoutSession",
+              "options": {
+                "mode": "payment",
+                "payment_method_types": [
+                  "card"
+                ],
+                "cancel_url": "http://localhost:3000/purchase_cancel",
+                "success_url": "http://localhost:3000/purchase_complete?checkout_session_id={CHECKOUT_SESSION_ID}",
+                "line_items": "{{line_items}}",
+                "lineItemsType": "customRef",
+                "shipping_address_collection": {
+                  "allowed_countries": [
+                    "US"
+                  ]
+                },
+                "shipping_options": "{{shipping_options}}"
+              },
+              "outputType": "object",
+              "meta": [
+                {
+                  "name": "after_expiration",
+                  "type": "object",
+                  "ref": "stripe_payment_pages_checkout_session_after_expiration"
+                },
+                {
+                  "name": "allow_promotion_codes",
+                  "type": "boolean"
+                },
+                {
+                  "name": "amount_subtotal",
+                  "type": "number"
+                },
+                {
+                  "name": "amount_total",
+                  "type": "number"
+                },
+                {
+                  "name": "automatic_tax",
+                  "type": "object",
+                  "ref": "stripe_payment_pages_checkout_session_automatic_tax"
+                },
+                {
+                  "name": "billing_address_collection",
+                  "type": "text"
+                },
+                {
+                  "name": "cancel_url",
+                  "type": "text"
+                },
+                {
+                  "name": "client_reference_id",
+                  "type": "text"
+                },
+                {
+                  "name": "consent",
+                  "type": "object",
+                  "ref": "stripe_payment_pages_checkout_session_consent"
+                },
+                {
+                  "name": "consent_collection",
+                  "type": "object",
+                  "ref": "stripe_payment_pages_checkout_session_consent_collection"
+                },
+                {
+                  "name": "currency",
+                  "type": "text"
+                },
+                {
+                  "name": "customer",
+                  "type": "text",
+                  "expand": [
+                    "stripe_customer",
+                    "stripe_deleted_customer"
+                  ]
+                },
+                {
+                  "name": "customer_creation",
+                  "type": "text"
+                },
+                {
+                  "name": "customer_details",
+                  "type": "object",
+                  "ref": "stripe_payment_pages_checkout_session_customer_details"
+                },
+                {
+                  "name": "customer_email",
+                  "type": "text"
+                },
+                {
+                  "name": "expires_at",
+                  "type": "number"
+                },
+                {
+                  "name": "id",
+                  "type": "text"
+                },
+                {
+                  "name": "line_items",
+                  "type": "object",
+                  "sub": [
+                    {
+                      "name": "data",
+                      "type": "array",
+                      "sub": [
+                        {
+                          "name": "amount_discount",
+                          "type": "number"
+                        },
+                        {
+                          "name": "amount_subtotal",
+                          "type": "number"
+                        },
+                        {
+                          "name": "amount_tax",
+                          "type": "number"
+                        },
+                        {
+                          "name": "amount_total",
+                          "type": "number"
+                        },
+                        {
+                          "name": "currency",
+                          "type": "text"
+                        },
+                        {
+                          "name": "description",
+                          "type": "text"
+                        },
+                        {
+                          "name": "discounts",
+                          "type": "array",
+                          "sub": [
+                            {
+                              "name": "amount",
+                              "type": "number"
+                            },
+                            {
+                              "name": "discount",
+                              "type": "object",
+                              "ref": "stripe_discount"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "id",
+                          "type": "text"
+                        },
+                        {
+                          "name": "object",
+                          "type": "text"
+                        },
+                        {
+                          "name": "price",
+                          "type": "object",
+                          "ref": "stripe_price"
+                        },
+                        {
+                          "name": "product",
+                          "type": "text",
+                          "expand": [
+                            "stripe_product",
+                            "stripe_deleted_product"
+                          ]
+                        },
+                        {
+                          "name": "quantity",
+                          "type": "number"
+                        },
+                        {
+                          "name": "taxes",
+                          "type": "array",
+                          "sub": [
+                            {
+                              "name": "amount",
+                              "type": "number"
+                            },
+                            {
+                              "name": "rate",
+                              "type": "object",
+                              "ref": "stripe_tax_rate"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "has_more",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "object",
+                      "type": "text"
+                    },
+                    {
+                      "name": "url",
+                      "type": "text"
+                    }
+                  ]
+                },
+                {
+                  "name": "livemode",
+                  "type": "boolean"
+                },
+                {
+                  "name": "locale",
+                  "type": "text"
+                },
+                {
+                  "name": "metadata",
+                  "type": "object"
+                },
+                {
+                  "name": "mode",
+                  "type": "text"
+                },
+                {
+                  "name": "object",
+                  "type": "text"
+                },
+                {
+                  "name": "payment_intent",
+                  "type": "text",
+                  "expand": [
+                    "stripe_payment_intent"
+                  ]
+                },
+                {
+                  "name": "payment_link",
+                  "type": "text",
+                  "expand": [
+                    "stripe_payment_link"
+                  ]
+                },
+                {
+                  "name": "payment_method_options",
+                  "type": "object",
+                  "ref": "stripe_checkout_session_payment_method_options"
+                },
+                {
+                  "name": "payment_method_types",
+                  "type": "array",
+                  "sub": []
+                },
+                {
+                  "name": "payment_status",
+                  "type": "text"
+                },
+                {
+                  "name": "phone_number_collection",
+                  "type": "object",
+                  "ref": "stripe_payment_pages_checkout_session_phone_number_collection"
+                },
+                {
+                  "name": "recovered_from",
+                  "type": "text"
+                },
+                {
+                  "name": "setup_intent",
+                  "type": "text",
+                  "expand": [
+                    "stripe_setup_intent"
+                  ]
+                },
+                {
+                  "name": "shipping",
+                  "type": "object",
+                  "ref": "stripe_shipping"
+                },
+                {
+                  "name": "shipping_address_collection",
+                  "type": "object",
+                  "ref": "stripe_payment_pages_checkout_session_shipping_address_collection"
+                },
+                {
+                  "name": "shipping_options",
+                  "type": "array",
+                  "sub": [
+                    {
+                      "name": "shipping_amount",
+                      "type": "number"
+                    },
+                    {
+                      "name": "shipping_rate",
+                      "type": "text",
+                      "expand": [
+                        "stripe_shipping_rate"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "shipping_rate",
+                  "type": "text",
+                  "expand": [
+                    "stripe_shipping_rate"
+                  ]
+                },
+                {
+                  "name": "status",
+                  "type": "text"
+                },
+                {
+                  "name": "submit_type",
+                  "type": "text"
+                },
+                {
+                  "name": "subscription",
+                  "type": "text",
+                  "expand": [
+                    "stripe_subscription"
+                  ]
+                },
+                {
+                  "name": "success_url",
+                  "type": "text"
+                },
+                {
+                  "name": "tax_id_collection",
+                  "type": "object",
+                  "ref": "stripe_payment_pages_checkout_session_tax_id_collection"
+                },
+                {
+                  "name": "total_details",
+                  "type": "object",
+                  "ref": "stripe_payment_pages_checkout_session_total_details"
+                },
+                {
+                  "name": "url",
+                  "type": "text"
+                }
+              ]
+            },
+            {
+              "name": "",
+              "options": {
+                "comment": "return the id of the checkout session to the front end so it can start payment collection"
+              }
+            },
+            {
+              "name": "id",
+              "module": "core",
+              "action": "setvalue",
+              "options": {
+                "value": "{{createCheckoutSession.id}}"
+              },
+              "output": true,
+              "meta": [],
+              "outputType": "text"
+            }
+          ]
+        },
+        "catch": {
+          "steps": {
+            "name": "error",
+            "module": "core",
+            "action": "setvalue",
+            "options": {
+              "value": "{{$_ERROR}}"
+            },
+            "output": true,
+            "meta": [],
+            "outputType": "text"
+          }
+        }
+      }
+    }
+  }
+}

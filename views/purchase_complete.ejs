@@ -1,0 +1,19 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="purchase_complete" appConnect="local" components="{dmxFormatter:{}}" -->
+<dmx-serverconnect id="retrieve_checkout_session" url="/api/retrieve_checkout_session" dmx-bind:noload="!query.checkout_session_id" dmx-param:checkout_session_id="query.checkout_session_id"></dmx-serverconnect>
+<dmx-value id="shipping_address" dmx-bind:value="retrieve_checkout_session.data.retrieveCheckoutSession.shipping.address"></dmx-value>
+<meta name="ac:route" content="/purchase_complete">
+<div class="container mt-5">
+    <div class="row row-cols-1">
+        <div class="col">
+            <h4>Thank you for your purchase</h4>
+        </div>
+        <div class="col">
+            <div class="d-flex flex-column">
+                <p dmx-text="'Amount total: '+(retrieve_checkout_session.data.retrieveCheckoutSession.amount_total/100).formatCurrency('$', '.', ',', 2)">A nice paragraph</p>
+                <p dmx-text="'Payment status: '+retrieve_checkout_session.data.retrieveCheckoutSession.payment_status.capitalize()">A nice paragraph</p>
+                <p dmx-text="'Shipping address: '+shipping_address.value.line1 + ' ' + shipping_address.value.city + ' ' + shipping_address.value.state + ' ' + shipping_address.value.postal_code">A nice paragraph</p>
+
+            </div>
+        </div>
+    </div>
+</div>

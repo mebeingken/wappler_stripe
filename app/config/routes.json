@@ -1,0 +1,20 @@
+{
+  "routes": [
+    {
+      "path": "/",
+      "page": "index",
+      "routeType": "page",
+      "layout": "main"
+    },
+    {
+      "path": "/purchase_cancel",
+      "page": "purchase_cancel",
+      "layout": "main"
+    },
+    {
+      "path": "/purchase_complete",
+      "page": "purchase_complete",
+      "layout": "main"
+    }
+  ]
+}

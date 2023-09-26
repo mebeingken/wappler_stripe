@@ -1,0 +1,14 @@
+{
+  "purchase_complete.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "purchase_cancel.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "connect_stripe.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  }
+}
